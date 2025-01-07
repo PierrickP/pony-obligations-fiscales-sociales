@@ -1,7 +1,9 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import { zod } from 'sveltekit-superforms/adapters';
 	import { superForm, defaults } from 'sveltekit-superforms';
 	import { intProxy } from 'sveltekit-superforms/client';
+	import { page } from '$app/stores';
 	import { incomeSchema } from '$lib/schemas';
 	import * as Form from '$lib/components/ui/form';
 	import { Input } from '$lib/components/ui/input';
@@ -18,7 +20,6 @@
 		validators: zod(incomeSchema),
 		resetForm: false,
 		onUpdate({ form }) {
-			console.log(form);
 			if (form.valid) {
 				isValid = true;
 			}
@@ -28,6 +29,15 @@
 
 	const { enhance } = superform;
 	const grossAnnualIncome = intProxy(superform, 'gross_annual_income');
+
+	onMount(() => {
+		const total = $page.url.searchParams.get('total');
+
+		if (total) {
+			grossAnnualIncome.set(total);
+			superform.submit();
+		}
+	});
 </script>
 
 <div class="container grid space-y-5">
@@ -46,7 +56,7 @@
 						bind:value={$grossAnnualIncome}
 						class="rounded-e-none text-right"
 					/>
-					<div class="flex w-8 items-center justify-center rounded-e-md bg-gray-200 text-center">
+					<div class="flex w-12 items-center justify-center rounded-e-md bg-gray-200 text-center">
 						€
 					</div>
 					&nbsp;
